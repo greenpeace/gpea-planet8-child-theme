@@ -71,6 +71,8 @@ class P4CT_Site {
 		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_admin_assets' ] );
 		// add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_public_assets' ] );
 		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_public_assets' ] );
+		add_filter( 'script_loader_tag', [ $this, 'add_async_tag' ], 10, 3);
+		add_action( 'wp_enqueue_scripts', [ $this, 'enqueue_tw_assets' ] );
 		add_action( 'after_setup_theme', [ $this, 'add_oembed_filter' ] );
 		// add_action( 'save_post', [ $this, 'p4_auto_generate_excerpt' ], 10, 2 );
 		add_action( 'save_post', [ $this, 'gpea_auto_set_tag' ], 10, 2 );
@@ -330,6 +332,32 @@ class P4CT_Site {
 			'show_scroll_times' => self::SHOW_SCROLL_TIMES,
 		] );
 		wp_enqueue_script( 'search-script' );
+	}
+
+	/**
+	 * Enqueu scripts which only used for Taiwan
+	 * @param string $hook Hook.
+	 */
+	public function enqueue_tw_assets ( $hook) {
+		wp_enqueue_script( 'zi-media', "//a.breaktime.com.tw/js/au.js?spj=NlEyMDUzMjBIS0tBSTFWTjkyNlM4Ng==",[], false, true );
+		
+	}
+
+	/**
+	 * Use async to load script in order not to block the main thread.
+	 *
+	 * @see  https://developer.wordpress.org/reference/hooks/script_loader_tag/
+	 * @param string $tag    The <script> tag for the enqueued script.
+	 * @param string $handle The script's registered handle.
+	 * @param string $src    The script's source URL.
+	 */
+	public function add_async_tag($tag, $handle, $src) {
+			$scriptNamesToBeAsyc = ['zi-media'];
+
+			if( !in_array($handle, $scriptNamesToBeAsyc)) {
+				return $tag; //We return the entire <script> tag as is without modifications.
+			}
+			return "<script type='text/javascript' async defer src='".$src."'></script>";
 	}
 
 	/**
