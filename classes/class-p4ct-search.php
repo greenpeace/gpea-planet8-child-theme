@@ -227,6 +227,9 @@ if ( ! class_exists( 'P4CT_Search' ) ) {
 				// Check if call action is correct.
 				if ( 'get_paged_posts' === $search_action ) {
 					$search_async = new static();
+					// Load the issue categories, as the first page does.
+					// Without them the cards added by Load More have no issue label.
+					$search_async->set_main_issues();
 					$search_async->set_context( $search_async->context );
 					$search_async->search_query = urldecode( filter_input( INPUT_GET, 'search_query', FILTER_SANITIZE_STRING ) );
 					
